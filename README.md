@@ -299,39 +299,35 @@ python examples/test_providers.py
 
 ---
 
-## 🧪 CI/CD y Cobertura de Tests
+## 🧪 CI/CD and Test Coverage
+This project uses **GitHub Actions** for CI/CD. The workflow is configured to:
+- Execute **tests only** on each push or pull request to `main`.
+- Require a **minimum code coverage of 40%** (using pytest-cov).
+- If coverage drops below that threshold or any test fails, the PR will be automatically rejected.
 
-Este proyecto utiliza **GitHub Actions** para CI/CD. El workflow está configurado para:
-- Ejecutar **solo los tests** en cada push o pull request a `main`.
-- Exigir una **cobertura mínima de código del 40%** (usando pytest-cov).
-- Si la cobertura baja de ese umbral o algún test falla, el PR será rechazado automáticamente.
-
-### Cómo ejecutar los tests y ver la cobertura localmente
-
+### How to run tests and view coverage locally
 ```sh
-# Ejecutar todos los tests y ver la cobertura en consola
+# Run all tests and view coverage in console
 pytest --cov=src --cov-report=term-missing -v
 
-# (Opcional) Ver un reporte HTML navegable
+# (Optional) View a navigable HTML report
 pytest --cov=src --cov-report=html
-# Luego abre htmlcov/index.html en tu navegador
+# Then open htmlcov/index.html in your browser
 ```
 
-### Buenas prácticas
-- Escribe tests para cada nueva funcionalidad.
-- No elimines tests sin justificación.
-- Si deshabilitas tests, documenta el motivo y crea un issue para su reactivación.
-- Mantén o mejora la cobertura en cada PR.
+### Best practices
+- Write tests for each new functionality.
+- Don't remove tests without justification.
+- If you disable tests, document the reason and create an issue for their reactivation.
+- Maintain or improve coverage with each PR.
 
-### Tests deshabilitados
-- Los tests de `tests/test_adapters.py` y `tests/test_repositories.py` están deshabilitados temporalmente. Se recomienda reactivarlos y corregirlos en el futuro para mejorar la cobertura y robustez del proyecto.
+### Disabled tests
+- Tests in `tests/test_adapters.py` and `tests/test_repositories.py` are temporarily disabled. It's recommended to reactivate and fix them in the future to improve project coverage and robustness.
 
 ---
 
 ## 🧪 Testing
-
 Run the test suite:
-
 ```bash
 # Run all tests
 pytest
