@@ -1,38 +1,42 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
+# Set working directory
 WORKDIR /app
 
-# Instalar dependencias del sistema
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
+    gcc \
+    postgresql-client \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copiar requirements y scripts de instalación
-COPY requirements.txt .
-COPY requirements-gemini.txt .
-COPY requirements-openai.txt .
-COPY requirements-deepseek.txt .
-COPY requirements-local.txt .
-COPY requirements-dev.txt .
-COPY install_llm_deps.py .
+# Install uv first
+RUN pip install --no-cache-dir uv
 
-# Instalar solo dependencias core primero
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy only dependency files (for better caching)
+COPY pyproject.toml uv.lock ./
 
-# Copiar el archivo .env primero
-COPY .env .
+# Create src directory structure (will be replaced by volume in dev)
+RUN mkdir -p src
 
-# Copiar el código de la aplicación
-COPY . .
+# Install dependencies (this layer will be cached)
+RUN uv pip install --system --no-cache --prerelease=allow -e .
 
-# Instalar dependencias LLM según variable de entorno
-ARG LLM_PROVIDERS=""
-ENV LLM_PROVIDERS=${LLM_PROVIDERS}
-RUN python install_llm_deps.py
+# Copy application code (only for production builds)
+# In development, this will be overridden by the volume mount
+COPY src/ ./src/
 
-# Exponer el puerto
+# Create non-root user
+RUN useradd -m -u 1000 appuser && \
+    chown -R appuser:appuser /app
+USER appuser
+
+# Expose port
 EXPOSE 8000
 
-# Comando por defecto
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"] 
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Run application
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]

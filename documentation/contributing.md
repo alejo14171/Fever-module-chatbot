@@ -23,18 +23,18 @@ By participating in this project, you agree to abide by our Code of Conduct. Ple
    cd Fever-module-chatbot
    ```
 
-### 2. Set Up Development Environment
+### 2. Set Up Development Environment (Recommended with uv)
 
-1. Create a virtual environment:
+1. Install [uv](https://github.com/astral-sh/uv).
+
+2. Sync dependencies:
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # Linux/Mac
-   venv\Scripts\activate     # Windows
+   uv sync
    ```
 
-2. Install development dependencies:
+3. (Optional) Activate virtual environment:
    ```bash
-   pip install -r requirements-dev.txt
+   source .venv/bin/activate
    ```
 
 ### 3. Create a Branch
@@ -53,10 +53,8 @@ git checkout -b feature/your-feature-name
 ### 5. Run Tests
 
 ```bash
-pytest
-flake8
-mypy .
-black . --check
+uv run pytest
+uv run black . --check
 ```
 
 ### 6. Commit Changes
@@ -100,9 +98,8 @@ Types:
 
 ### Testing
 
-- Write unit tests for new features
+- Write unit tests for new nodes or logic in `src/fever_routing/`
 - Maintain test coverage above 80%
-- Include integration tests for API endpoints
 - Test edge cases and error conditions
 
 ### Documentation
@@ -128,7 +125,7 @@ Types:
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the project's GNU GPL v3.0 License. 
+By contributing, you agree that your contributions will be licensed under the project's GNU GPL v3.0 License.
 
 ---
 
@@ -139,4 +136,4 @@ If you find a bug or want to suggest an improvement, please use our issue templa
 - [Report a Bug](https://github.com/alejo14171/Fever-module-chatbot/issues/new?template=bug_report.md): For reporting errors or unexpected behavior in the pediatric fever chatbot. Please provide as much detail as possible.
 - [Request a Feature](https://github.com/alejo14171/Fever-module-chatbot/issues/new?template=feature_request.md): For suggesting new features or improvements. Tell us how your idea could help users or improve the project.
 
-This helps us keep the project organized and ensures your feedback is addressed efficiently. 
+This helps us keep the project organized and ensures your feedback is addressed efficiently.

@@ -1,350 +1,98 @@
+---
+layout: default
+title: Prompt Engineering
+nav_order: 8
+---
+
 # 🧠 Prompt Engineering System
 
 ## Overview
 
-The DocoKids Pediatric Chatbot implements an advanced **prompt engineering system** designed to simulate real pediatric consultations. This system ensures that the AI behaves like an experienced pediatrician, conducting structured conversations that gather information progressively while maintaining medical safety standards.
+The Fever Model uses a **LangGraph-based** architecture where prompt engineering is distributed across specialized **nodes**. Instead of a single monolithic prompt, we use distinct prompts for specific tasks: **Extraction (Receptor)**, **Inquiry**, and **Recommendation**.
 
-## 🎯 Objectives
+## Architecture
 
-- **Simulate Real Medical Consultations**: Mimic the natural flow of pediatric appointments
-- **Ensure Patient Safety**: Detect emergency situations and provide appropriate guidance
-- **Maintain Conversation Quality**: One question per response for focused interactions
-- **Provide Educational Value**: Offer guidance while avoiding definitive diagnoses
-- **Adapt to Context**: Tailor questions based on information already provided
+The system is composed of specialized agents (nodes), each with its own prompt engineering strategy:
 
-## 🏗️ Architecture
+### 1. Receptor Node (Extraction)
 
-### Core Components
+**Goal**: Extract structured data from unstructured user messages into the `State`.
 
-```
-src/core/prompts.py
-├── MedicalPrompts Class
-├── ConversationPhase Enum
-├── System Prompts
-├── Discovery Questions
-├── Safety Checks
-└── Context Analysis
-```
+- **Strategy**: One-shot extraction with complex JSON-like structure parsing.
+- **Prompt**:
+  - Contains definitions for all state fields (e.g., `patient_age_months`, `temperature`, `fever_duration_hours`).
+  - Instructs the LLM to output *only* the fields found in the user's message.
+  - Handles normalization (e.g., "dos años" -> "24" months).
 
-### Conversation Flow Control
+### 2. Inquiry Node (Question Generation)
 
-```
-src/providers/gemini_client.py
-├── Phase Detection
-├── Context Analysis
-├── Question Validation
-├── Response Correction
-└── Safety Monitoring
-```
+**Goal**: Ask the next most important question to complete the clinical checklist.
 
-## 📋 Conversation Phases
+- **Strategy**: Context-aware question generation based on missing fields.
+- **Prompt**:
+  - Receives the list of *missing* critical and important fields.
+  - Instructs the LLM to ask *one* clear, empathetic question to gather the missing info.
+  - Prioritizes urgency (e.g., if age is missing, ask age first).
 
-### 1. INITIAL Phase
-**Purpose**: Establish basic patient information
-**Trigger**: First interaction in a conversation
-**Behavior**: 
-- Introduces as "pediatra de DocoKids"
-- Asks for child's age specifically
-- No other questions allowed
+### 3. Recommendation Node (Advice)
 
-**Example**:
-```
-Bot: "Hola, soy el pediatra de DocoKids. ¿Cuál es la edad del niño?"
-```
+**Goal**: Provide clinical advice based on the completed checklist.
 
-### 2. DISCOVERY Phase
-**Purpose**: Explore symptoms and gather basic information
-**Trigger**: After age is provided, before detailed assessment
-**Behavior**:
-- One question per response
-- Focuses on main symptom identification
-- Avoids multiple questions
+- **Strategy**: Chain-of-thought reasoning based on guidelines.
+- **Prompt**:
+  - Receives the fully populated `State`.
+  - Includes clinical guidelines (NICE/AAP) for fever management.
+  - Generates a structured response: Assessment -> Home Care -> Warning Signs.
 
-**Example**:
-```
-Bot: "¿Cuál es el síntoma principal que te preocupa?"
-User: "Fiebre"
-Bot: "¿Cuál es la temperatura del niño?"
-```
+## Key Prompt Features
 
-### 3. ASSESSMENT Phase
-**Purpose**: Detailed evaluation of symptoms
-**Trigger**: After basic symptom information is gathered
-**Behavior**:
-- Asks about intensity, duration, and behavior
-- Explores related symptoms
-- Maintains one-question format
+### State-Driven Context
+Instead of relying on conversation history strings, we inject the **Structured State** into the prompt. This reduces hallucinations and ensures the LLM focuses on what is known vs. unknown.
 
-**Example**:
-```
-Bot: "¿Cuánto tiempo lleva con fiebre?"
-User: "Un día"
-Bot: "¿Ha tenido algún otro síntoma además de la fiebre?"
-```
+### Safety Rails
+- **Urgency Detection**: A deterministic Python function (`assess_urgency`) runs *before* the LLM to detect red flags (e.g., age < 3 months, temp > 40°C).
+- **Red Flag Prompts**: If red flags are detected, the system bypasses standard inquiry and triggers the `UrgencyRecommendation` node with a prompt focused on immediate action (ER/911).
 
-### 4. GUIDANCE Phase
-**Purpose**: Provide educational guidance and recommendations
-**Trigger**: Sufficient information has been gathered
-**Behavior**:
-- Offers educational content
-- Provides safety recommendations
-- Suggests when to consult a doctor
-
-**Example**:
-```
-Bot: "Basado en la información que me has proporcionado, 
-la fiebre de 39°C en un niño de 1 año requiere observación. 
-Te recomiendo consultar con un pediatra si..."
-```
-
-## 🔧 Implementation Details
-
-### Phase Detection Logic
-
-```python
-def _determine_phase(conversation_history):
-    user_messages = [msg for msg in history if msg.get('role') == 'user']
-    
-    if len(user_messages) == 0:
-        return ConversationPhase.INITIAL
-    elif len(user_messages) <= 2:
-        return ConversationPhase.DISCOVERY
-    elif len(user_messages) <= 5:
-        return ConversationPhase.ASSESSMENT
-    else:
-        return ConversationPhase.GUIDANCE
-```
-
-### Context Analysis
-
-The system analyzes conversation history to extract key information:
-
-```python
-context_info = {
-    'has_age': False,
-    'has_symptom': False,
-    'symptom': None,
-    'age': None
-}
-```
-
-**Detection Patterns**:
-- **Age**: `(\d+)\s*(años?|meses?|mes|año)`
-- **Symptoms**: Predefined keywords for fever, cough, pain, vomiting, etc.
-
-### Question Validation
-
-The system ensures responses contain exactly one question:
-
-```python
-def _validate_single_question(response_text, phase):
-    question_marks = response_text.count('?')
-    
-    if question_marks == 0:
-        # Add appropriate question
-    elif question_marks == 1:
-        # Perfect
-    else:
-        # Remove extra questions
-```
-
-## 🚨 Safety System
-
-### Emergency Detection
-
-The system automatically detects emergency keywords:
-
-```python
-emergency_keywords = {
-    'dificultad para respirar': 'URGENTE: Busca atención médica inmediata',
-    'no responde': 'URGENTE: Busca atención médica inmediata',
-    'muy somnoliento': 'URGENTE: Busca atención médica inmediata',
-    'convulsión': 'URGENTE: Busca atención médica inmediata',
-    'fiebre 40': 'URGENTE: Si es un bebé menor de 3 meses, consulta inmediatamente'
-}
-```
-
-### Safety Response
-
-When emergency keywords are detected:
-
-```
-🚨 URGENTE: Busca atención médica inmediata
-
-Por favor, busca atención médica inmediata. 
-Esta información no reemplaza la consulta médica profesional.
-```
-
-## 📝 Prompt Templates
-
-### System Prompt Structure
+## Example: Receptor Prompt
 
 ```python
 SYSTEM_PROMPT = """
-Eres un pediatra experto y empático que trabaja en DocoKids.
+You are an expert medical data extractor.
+Your job is to update the patient state based on the user's message.
 
-DIRECTRICES PRINCIPALES:
-1. ACTÚA COMO UN PEDIATRA REAL
-2. NO DAR DIAGNÓSTICOS DEFINITIVOS
-3. SIEMPRE RECOMIENDA CONSULTAR CON UN MÉDICO
-4. USA LENGUAJE CLARO Y EMPÁTICO
-5. HAZ UNA PREGUNTA A LA VEZ
-6. CONSTRUYE SOBRE LA INFORMACIÓN PREVIA
+OUTPUT FORMAT:
+field_name: value
 
-LÍMITES IMPORTANTES:
-- NO prescribir medicamentos específicos
-- NO hacer diagnósticos definitivos
-- NO reemplazar la consulta médica profesional
-- SIEMPRE priorizar la seguridad del niño
+FIELDS:
+- patient_age_months: Age in months (convert years to months).
+- temperature: Body temperature in Celsius.
+- symptoms: Comma-separated list of symptoms.
+
+RULES:
+- Only output fields present in the message.
+- Normalize values (e.g., "39.5 degrees" -> "39.5").
 """
 ```
 
-### Phase-Specific Instructions
-
-Each phase has specific instructions added to the system prompt:
-
-**INITIAL Phase**:
-```
-- Esta es la primera interacción. DEBES hacer UNA pregunta específica.
-- Pregunta EXACTAMENTE: '¿Cuál es la edad del niño?'
-- NO hagas preguntas generales como '¿cuál es el motivo?'
-```
-
-**DISCOVERY Phase**:
-```
-- Estás en fase de descubrimiento. Haz UNA pregunta específica.
-- Si ya sabes la edad pero no el síntoma: '¿Cuál es el síntoma principal que te preocupa?'
-- NO hagas preguntas generales o vagas.
-```
-
-## 🔄 Conversation Flow Examples
-
-### Complete Example
-
-```
-Phase: INITIAL
-Bot: "Hola, soy el pediatra de DocoKids. ¿Cuál es la edad del niño?"
-User: "1 año"
-
-Phase: DISCOVERY
-Bot: "¿Cuál es el síntoma principal que te preocupa?"
-User: "Fiebre"
-Bot: "¿Cuál es la temperatura del niño?"
-User: "39°C"
-
-Phase: ASSESSMENT
-Bot: "¿Cuánto tiempo lleva con fiebre?"
-User: "Un día"
-Bot: "¿Ha tenido algún otro síntoma además de la fiebre?"
-User: "No, solo fiebre"
-
-Phase: GUIDANCE
-Bot: "Basado en la información proporcionada, la fiebre de 39°C 
-en un niño de 1 año requiere observación. Te recomiendo..."
-```
-
-### Emergency Detection Example
-
-```
-User: "Mi hijo tiene dificultad para respirar"
-Bot: "🚨 URGENTE: Busca atención médica inmediata
-
-Por favor, busca atención médica inmediata. 
-Esta información no reemplaza la consulta médica profesional."
-```
-
-## 🛠️ Configuration
-
-### Environment Variables
-
-```bash
-LLM_PROVIDER=gemini  # or openai
-GEMINI_API_KEY=your_api_key
-OPENAI_API_KEY=your_api_key
-```
-
-### Customization
-
-To modify the prompt engineering system:
-
-1. **Add New Phases**: Extend `ConversationPhase` enum
-2. **Modify Questions**: Update `DISCOVERY_QUESTIONS` or `SYMPTOM_SPECIFIC_QUESTIONS`
-3. **Add Safety Keywords**: Extend `emergency_keywords` dictionary
-4. **Change Phase Logic**: Modify `_determine_phase` function
-
-## 🧪 Testing
-
-### Unit Tests
-
-```bash
-# Test prompt generation
-pytest tests/test_prompts.py
-
-# Test conversation flow
-pytest tests/test_conversation_flow.py
-
-# Test safety detection
-pytest tests/test_safety_checks.py
-```
-
-### Integration Tests
-
-```bash
-# Test complete conversation flow
-pytest tests/integration/test_full_conversation.py
-```
-
-## 📊 Monitoring
-
-### Logging
-
-The system provides detailed logging for debugging:
+## Example: Inquiry Prompt
 
 ```python
-logger.info(f"Conversation phase: {phase.value}")
-logger.info(f"Generated response for phase {phase.value}: {response_text[:100]}...")
-logger.warning(f"Multiple questions detected in response: {response_text}")
+SYSTEM_PROMPT = """
+You are a pediatric triage assistant.
+Your goal is to complete the clinical checklist.
+
+MISSING DATA:
+{missing_fields}
+
+INSTRUCTION:
+Ask ONE clear, polite question to get the most important missing field.
+Do not give medical advice yet.
+"""
 ```
 
-### Metrics
+## Configuration
 
-Track conversation quality metrics:
-- Phase transition frequency
-- Question validation success rate
-- Emergency detection accuracy
-- Response time per phase
-
-## 🔮 Future Enhancements
-
-### Planned Features
-
-1. **Multi-language Support**: Extend prompts for different languages
-2. **Symptom-Specific Flows**: Specialized conversation paths for different conditions
-3. **Age-Appropriate Questions**: Tailor questions based on child's age
-4. **Cultural Sensitivity**: Adapt prompts for different cultural contexts
-5. **Learning System**: Improve prompts based on conversation outcomes
-
-### Research Areas
-
-- **Conversation Quality Metrics**: Develop better ways to measure conversation effectiveness
-- **Prompt Optimization**: A/B testing for different prompt variations
-- **Safety Enhancement**: Improve emergency detection algorithms
-- **Personalization**: Adapt prompts based on user history and preferences
-
-## 📚 References
-
-- [FastAPI Documentation](https://fastapi.tiangolo.com/)
-- [Google Generative AI](https://ai.google.dev/)
-- [Medical AI Ethics Guidelines](https://www.who.int/health-topics/artificial-intelligence)
-- [Pediatric Assessment Guidelines](https://www.aap.org/)
-
-## 🤝 Contributing
-
-To contribute to the prompt engineering system:
-
-1. Review the current implementation in `src/core/prompts.py`
-2. Test your changes thoroughly
-3. Update this documentation
-4. Submit a pull request with detailed description
-
-For questions or suggestions, please open an issue in the repository. 
+Prompts are located in:
+- `src/fever_routing/nodes/receptor/prompt.py`
+- `src/fever_routing/nodes/inquiry/prompt.py`
+- `src/fever_routing/nodes/recommendation/prompt.py`

@@ -1,46 +1,48 @@
-version: '3.8'
-
 services:
-  app:
-    build: .
-    ports:
-      - "8000:8000"
-    environment:
-      - POSTGRES_URL=postgresql+asyncpg://postgres:postgres@db:5432/docochat
-      - REDIS_URL=redis://redis:6379/0
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    volumes:
-      - .:/app
-    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
-
   db:
-    image: postgres:15
+    image: postgres:15-alpine
+    restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=docochat
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mydb
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_dev:/var/lib/postgresql/data
+    networks:
+      - backend
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
 
-  redis:
-    image: redis:7
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "6379:6379"
+      - "8000:8000"
+    user: root  # Run as root in development for hot reload
+    environment:
+      - DB_URI=postgresql://postgres:postgres@db:5432/mydb
+      - ENVIRONMENT=development
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
     volumes:
-      - redis_data:/data
+      - ./src:/app/src
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/src --use-colors --log-level info
+
+networks:
+  backend:
+    driver: bridge
 
 volumes:
-  postgres_data:
-  redis_data: 
+  postgres_data_dev:
