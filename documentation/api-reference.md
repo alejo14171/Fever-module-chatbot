@@ -6,7 +6,9 @@ nav_order: 4
 
 # API Reference
 
-This document provides detailed information about the **Fever Model** of **Docokids** API endpoints. **The chatbot and API are designed to handle conversations in Spanish. All responses will be in Spanish by default.**
+This document provides detailed information about the **Fever Model** of **Docokids** API endpoints. The system uses a **LangGraph** agent to handle pediatric fever triage.
+
+**The chatbot and API are designed to handle conversations in Spanish.**
 
 ## Base URL
 
@@ -16,233 +18,164 @@ http://localhost:8000
 
 ## Authentication
 
-Currently, the API does not require authentication. All endpoints are publicly accessible.
+The API uses two levels of authentication:
+
+1.  **Admin Login**: Returns a JWT token and the shared API Key.
+2.  **API Key**: Required for Chat and Feedback endpoints (Header: `X-API-Key`).
 
 ## Endpoints
 
-### Conversations
+### Authentication
 
-#### Create New Conversation
+#### Admin Login
 ```http
-POST /conversations
+POST /api/admin/login
 ```
 
-Creates a new conversation and returns its ID.
-
-**Response**
-```json
-{
-  "id": "uuid-string",
-  "messages": []
-}
-```
-
-**Status Code**: `201 Created`
-
-#### Send Message
-```http
-POST /conversations/{conv_id}/messages
-```
-
-Sends a user message and receives an AI response from the pediatric chatbot.
+Login as administrator to obtain access tokens and the API key.
 
 **Request Body**
 ```json
 {
-  "role": "user",
-  "content": "Hola, mi niño tiene fiebre."
+  "username": "admin",
+  "password": "your_password"
 }
 ```
 
 **Response**
 ```json
 {
-  "id": "uuid-string",
-  "role": "assistant",
-  "content": "Hola, soy Docobot de DocoKids. ¿Cuál es la edad del niño?",
-  "timestamp": "2024-03-20T12:00:00Z"
+  "access_token": "ey...",
+  "token_type": "bearer",
+  "expires_in": 604800,
+  "api_key": "your_secret_api_key"
 }
 ```
 
-**Status Code**: `200 OK`
+### Chat (LangGraph)
 
-**Error Responses**:
-- `404 Not Found`: Conversation not found
-- `400 Bad Request`: Invalid message format
-
-#### Get Conversation History
+#### Send Message
 ```http
-GET /conversations/{conv_id}/history
+POST /chat/{chat_id}
 ```
 
-Retrieves the full conversation history with all messages.
+Sends a user message to the LangGraph agent and receives the final response. The agent persists state using the `chat_id` (thread_id).
+
+**Headers**
+- `X-API-Key`: `your_secret_api_key`
+
+**Request Body**
+```json
+{
+  "message": "Hola, mi hijo tiene fiebre"
+}
+```
 
 **Response**
 ```json
 {
-  "id": "uuid-string",
-  "messages": [
-    {
-      "id": "uuid-string",
-      "role": "user",
-      "content": "Hola, mi niño tiene fiebre",
-      "timestamp": "2024-03-20T12:00:00Z"
-    },
-    {
-      "id": "uuid-string",
-      "role": "assistant", 
-      "content": "Hola, soy Docobot de DocoKids. ¿Cuál es la edad del niño?",
-      "timestamp": "2024-03-20T12:00:01Z"
-    }
-  ]
+  "response": "Hola. Entiendo que tu hijo tiene fiebre. Para poder ayudarte mejor, ¿me podrías decir qué edad tiene?"
 }
 ```
 
-**Status Code**: `200 OK`
-
-**Error Responses**:
-- `404 Not Found`: Conversation not found
-
-#### List All Conversations
+#### Stream Response
 ```http
-GET /conversations/
+POST /chat/{chat_id}/stream
 ```
 
-Lists all conversations with summary information.
+Streams the agent's response token-by-token (Server-Sent Events).
 
-**Response**
-```json
-[
-  {
-    "id": "uuid-string",
-    "message_count": 4,
-    "last_message_timestamp": "2024-03-20T12:00:00Z"
-  },
-  {
-    "id": "uuid-string",
-    "message_count": 2,
-    "last_message_timestamp": "2024-03-20T11:30:00Z"
-  }
-]
-```
+**Headers**
+- `X-API-Key`: `your_secret_api_key`
 
-**Status Code**: `200 OK`
-
-### Health Check
-
-#### Check API Health
-```http
-GET /health
-```
-
-Checks the health status of the API and its dependencies.
-
-**Response**
+**Request Body**
 ```json
 {
-  "status": "ok"
+  "message": "Tiene 2 años"
 }
 ```
 
-**Status Code**: `200 OK`
+**Response (SSE)**
+```
+data: Entiendo
+data: ,
+data: tiene
+data: 2
+data: años
+...
+```
+
+### Feedback
+
+#### Submit Feedback
+```http
+POST /submit-feedback
+```
+
+Submit user feedback about the triage experience.
+
+**Headers**
+- `X-API-Key`: `your_secret_api_key`
+
+**Request Body**
+```json
+{
+  "firstName": "Juan",
+  "lastName": "Perez",
+  "clarity": "Sí",
+  "helpfulness": "Sí",
+  "medicalGuidance": "Sí",
+  "tone": "Sí",
+  "confusion": "No",
+  "recommendation": "Definitivamente sí",
+  "improvements": "Ninguna",
+  "sessionId": "chat_123"
+}
+```
+
+#### Get All Feedback
+```http
+GET /feedback
+```
+
+Retrieves all feedback records.
+
+**Headers**
+- `X-API-Key`: `your_secret_api_key`
+
+#### Get Feedback Stats
+```http
+GET /feedback/stats
+```
+
+Retrieves aggregated statistics.
+
+**Headers**
+- `X-API-Key`: `your_secret_api_key`
 
 ## Data Models
 
-### MessageCreate
+### Message
 ```json
 {
-  "role": "user",
-  "content": "string"
+  "message": "string"
 }
 ```
 
-### MessageResponse
+### TokenResponse
 ```json
 {
-  "id": "uuid-string",
-  "role": "assistant",
-  "content": "string",
-  "timestamp": "datetime-string"
-}
-```
-
-### ConversationResponse
-```json
-{
-  "id": "uuid-string",
-  "messages": [
-    {
-      "id": "uuid-string",
-      "role": "string",
-      "content": "string",
-      "timestamp": "datetime-string"
-    }
-  ]
-}
-```
-
-### ConversationListItem
-```json
-{
-  "id": "uuid-string",
-  "message_count": 0,
-  "last_message_timestamp": "datetime-string"
+  "access_token": "string",
+  "token_type": "string",
+  "expires_in": "integer",
+  "api_key": "string"
 }
 ```
 
 ## Error Responses
 
-The API uses standard HTTP status codes and returns error messages in the following format:
+The API uses standard HTTP status codes:
 
-```json
-{
-  "detail": "Error message description"
-}
-```
-
-### Error Codes
-
-| HTTP Status | Description |
-|-------------|-------------|
-| `400 Bad Request` | Invalid input data or request format |
-| `404 Not Found` | Resource not found (conversation, etc.) |
-| `500 Internal Server Error` | Server error |
-
-### Example Error Responses
-
-#### Not Found Error
-```json
-{
-  "detail": "Conversación no encontrada"
-}
-```
-
-#### Validation Error
-```json
-{
-  "detail": "Invalid message format"
-}
-```
-
-## Example Usage
-
-### Complete Conversation Flow
-
-1. **Create a new conversation**:
-```bash
-curl -X POST "http://localhost:8000/conversations"
-```
-
-2. **Send first message**:
-```bash
-curl -X POST "http://localhost:8000/conversations/{conversation_id}/messages" \
-  -H "Content-Type: application/json" \
-  -d '{"role": "user", "content": "Mi hijo tiene fiebre"}'
-```
-
-3. **Continue conversation**:
-```bash
-curl -X POST "http://localhost:8000/conversations/{conversation_id}/messages" \
-  -H "Content-Type: application/json" \
-  -d '{"role": "user", "content": "2 años"}'
-```
+- `401 Unauthorized`: Invalid or missing API Key/Credentials.
+- `422 Unprocessable Entity`: Invalid input data.
+- `500 Internal Server Error`: Server processing error.
