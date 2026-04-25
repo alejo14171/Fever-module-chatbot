@@ -177,6 +177,14 @@ class PatientSimulator:
                 "\n\nIMPORTANTE: tu pánico está escalando. Intercala datos clínicos "
                 "con frases de pánico ('estoy temblando', 'qué hago doctor', '¿es muy malo?')."
             )
+        if case.get("late_disclosure") and 3 <= user_count <= 5 and not case.get("_disclosed"):
+            disclosure = case.get("late_disclosure")
+            case["_disclosed"] = True  # mark so we only do it once
+            pattern_hint = (
+                f"\n\nIMPORTANTE: este turno DEBES REVELAR este síntoma que olvidaste contar antes: "
+                f"\"{disclosure}\". Decílo como 'ah doctor, por cierto…' o 'ay, ya recordé, …' integrado "
+                f"en tu mensaje. NO podés omitirlo."
+            )
 
         user_prompt = (
             f"{self._persona_card()}\n\n"

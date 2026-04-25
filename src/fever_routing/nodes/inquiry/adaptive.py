@@ -108,6 +108,12 @@ REGLAS DE COMPORTAMIENTO (críticas):
   rigidez de nuca, vómito repetido tras golpe), priorizá ESO sobre todo lo demás.
 - target_field: UNO de los disponibles, o 'fever_check' / 'event_followup' / 'general_open' / 'out_of_scope_exit'.
 
+**ANTI-REDUNDANCIA (importante):**
+- Si el estado ya tiene un valor para un campo (edad, peso, temperatura, duración, etc.), NUNCA
+  vuelvas a pedir ese campo. Mira el bloque "Estado conocido del paciente" en el contexto.
+- Si todos los missing_fields ya están en el bloque conocido O ya preguntaste, elegí 'out_of_scope_exit'
+  o 'general_open' — el sistema decidirá si pasar a recomendación.
+
 EJEMPLOS DE DECISIÓN (estudialos):
 
 Caso A — padre habla de golpe sin fiebre confirmada:

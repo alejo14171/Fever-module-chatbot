@@ -508,6 +508,13 @@ def triage_route(
     Esta es la función de ROUTING del grafo.
     """
 
+    # SAFETY-FIRST: critical red flags ALWAYS short-circuit. A pending user
+    # question can wait — saving the child can't.
+    early_urgency = assess_urgency(state)
+    if early_urgency["level"] == "critical":
+        debug_print("🚨 critical red flag → urgency_recommendation (bypassing pending question)")
+        return "urgency_recommendation"
+
     # DECISIÓN 0X: si el padre hizo una pregunta directa además de aportar data,
     # después de extraer respondemos la pregunta antes de seguir el script.
     pending_q = state.get("pending_user_question", "") or ""

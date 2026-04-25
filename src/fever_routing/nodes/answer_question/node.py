@@ -41,9 +41,10 @@ REGLAS DURAS:
 - Hablás tuteando, sin emojis, sin "como pediatra…".
 - Tu respuesta debe ser HONESTA Y SEGURA — no inventes diagnóstico ni dosis sin datos.
 - Si te pasan datos críticos faltantes en el contexto, pedí UNO específico al final ("para responderte bien necesito X").
-- Si NO tenés datos suficientes para opinar con seguridad: contené + pedí dato faltante + escalá ("si te urge antes de que pueda orientarte, consultá pediatra/urgencias").
 - Si tenés datos suficientes: respuesta tentativa breve + 1 pregunta para refinar.
 - Para preguntas tipo "¿es grave?" / "¿qué hago?": no minimices NI alarmes. Da contexto basado en datos reales que tienes.
+- PROHIBIDO usar las frases "si te urge antes…", "antes de que pueda orientarte", "si te sientes muy preocupado consulta urgencias", "consulta con tu pediatra o urgencias" como muletilla. Son mecánicas y repetitivas. Sólo escalá explícitamente cuando la urgencia clínica REAL lo amerite (red flag detectado), nunca como cierre genérico.
+- Variá las muletillas turno a turno. NO repitas frase exacta del turno anterior.
 
 Devolvé SOLO el mensaje al padre, sin meta-comentarios."""
 
@@ -52,7 +53,9 @@ def _has_critical_data(state: State) -> bool:
     age = safe_parse_int(state.get("patient_age_months", ""), -1)
     temp = safe_parse_float(state.get("temperature", ""), -1.0)
     duration = safe_parse_float(state.get("fever_duration_hours", ""), -1.0)
-    return age >= 0 and temp > 0 and duration >= 0
+    tactile = state.get("tactile_fever_assessment") or ""
+    has_temp_signal = temp > 0 or bool(tactile)
+    return age >= 0 and has_temp_signal and duration >= 0
 
 
 def answer_question_node(state: State):
@@ -82,13 +85,22 @@ def answer_question_node(state: State):
     urgency = assess_urgency(state)
     red_flags = detect_red_flags(state)
 
+    has_thermometer = state.get("has_thermometer") or "desconocido"
+    tactile = state.get("tactile_fever_assessment") or "(no evaluado)"
+    weight = state.get("patient_weight_kg") or "desconocido"
+    other_sym = state.get("other_symptoms") or "(ninguno)"
+
     user_prompt = (
         f"PREGUNTA DEL PADRE: \"{question}\"\n\n"
         f"DATOS QUE TENÉS DEL PACIENTE:\n"
         f"  Edad meses: {age}\n"
-        f"  Temperatura: {temp}\n"
+        f"  Peso kg: {weight}\n"
+        f"  Temperatura medida: {temp}\n"
+        f"  Termómetro: {has_thermometer}\n"
+        f"  Evaluación táctil de fiebre: {tactile}\n"
         f"  Duración fiebre (h): {duration}\n"
         f"  Síntomas generales: {state.get('general_symptoms', '') or '(no recolectado)'}\n"
+        f"  Otros síntomas (dolor, etc): {other_sym}\n"
         f"  Antecedentes: {state.get('medical_history', '') or '(no recolectado)'}\n"
         f"  Red flags detectados: {', '.join(red_flags) if red_flags else 'ninguno'}\n"
         f"  Nivel de urgencia calculado: {urgency['level']}\n\n"
@@ -96,7 +108,7 @@ def answer_question_node(state: State):
         f"ÚLTIMA PREGUNTA QUE HABÍAS HECHO: {last_q or '(ninguna)'}\n"
         f"ESTADO RECOMENDACIÓN: {'ya entregada' if rec_section == 'done' else ('urgencia entregada' if urgency_given == 'yes' else 'pendiente')}\n"
         + (f"\nRECOMENDACIÓN PREVIA RESUMEN: {prior_assessment[:300]}\n" if prior_assessment else "")
-        + "\nGenerá tu respuesta corta y segura."
+        + "\nGenerá tu respuesta corta y segura. Si tienes evaluación táctil, ÚSALA — no pidas otra vez la temperatura. Si tienes 'caliente' táctil + edad ≥6m + sin red flags, podés sugerir dosis de paracetamol calculada por peso."
     )
 
     try:

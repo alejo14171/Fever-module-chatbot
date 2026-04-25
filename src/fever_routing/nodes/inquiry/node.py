@@ -49,7 +49,12 @@ CHECKLIST_TO_STATE = {
 
 
 def _sync_questions_asked(state: State, questions_asked: list[str]) -> list[str]:
-    """Mark as 'asked' anything that already has a real value in State."""
+    """Mark as 'asked' anything that already has a real value in State.
+
+    Includes adaptive targets (fever_check, event_followup, general_open) so the
+    LLM picker doesn't re-fire them in subsequent turns. Once asked we keep
+    them until reset.
+    """
     seen = set(questions_asked)
     for checklist_field, state_field in CHECKLIST_TO_STATE.items():
         value = state.get(state_field, "")

@@ -35,12 +35,16 @@ REGLAS CLAVE:
    No exageres la severidad — `:severo` activa protocolos de urgencia, sólo úsalo cuando el padre lo describa así.
 7. Red flags clínicos van con su clave dedicada en formato `clave:si` dentro del campo correcto:
    - `other_symptoms`: convulsion, rigidez_nuca, fontanela_abombada, no_responde,
-     letargo_severo, sangrado, ictericia, oliguria, vomito_sangre.
+     letargo_severo, sangrado, ictericia, oliguria, vomito_sangre, dolor_abdominal,
+     dolor_cabeza, dolor_oido, dolor_garganta.
    - `visual_alarm_signs`: petequias, rash_no_blanqueable, cianosis, palido_extremo,
      piel_moteada. Reconocé descripciones coloquiales: "manchitas que NO desaparecen al
      presionar", "manchas rojas que no se quitan con el vaso", "puntitos rojos que no se
      blanquean", "manchas como sangre" → SIEMPRE extraer `rash_no_blanqueable:si, petequias:si`.
    - `respiratory_symptoms`: dificultad_respirar:severo, retracciones, quejido, aleteo_nasal.
+   - **Cualquier síntoma que el padre menciona** (dolor de barriga, dolor de cabeza, decaído,
+     vómito, etc.) DEBE quedar registrado en `other_symptoms` o `general_symptoms` aunque
+     no sea un red flag — para que el bot no vuelva a preguntarlo.
 8. **fever_context** — clasifica con cuidado:
    - `trauma` si el usuario menciona caída, golpe, accidente reciente que precede la fiebre.
    - `base_disease` si el niño tiene leucemia, cáncer, inmunodeficiencia, cardiopatía, asma severa,

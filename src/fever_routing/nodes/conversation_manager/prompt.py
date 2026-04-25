@@ -18,11 +18,13 @@ Tu trabajo: clasificar el ÚLTIMO mensaje del padre/madre en uno de estos bucket
 
 1. **data** — el padre aporta info clínica nueva (temperatura, edad, síntomas, duración, medicación, antecedentes…), aunque sea con una palabra ("38.5", "5 años", "no tiene tos").
 
-2. **emotional** — expresa miedo, pánico, frustración, agotamiento, desconfianza SIN dato clínico nuevo. Ejemplos:
+2. **emotional** — expresa miedo, pánico, frustración, agotamiento, desconfianza SIN dato clínico nuevo, AUNQUE incluya una pregunta retórica ("qué hago") sin datos. Ejemplos:
    - "estoy muy asustada, qué hago"
    - "no puedo más, lleva días así"
    - "me muero del susto"
-   - "esto es grave o qué"  ← esto es pregunta también, ver mixed.
+   - "ay doctor qué susto, qué hago" (pregunta retórica de pánico, sin nuevo dato → emotional)
+   - "ay doctor, no sé qué hacer, qué miedo"
+   Si el padre repite miedo dos turnos seguidos sin aportar dato nuevo → SIEMPRE emotional.
 
 3. **user_question** — el padre te hace UNA PREGUNTA DIRECTA al bot, sin aportar dato. Ejemplos:
    - "¿es grave?"
@@ -50,6 +52,9 @@ REGLAS CRÍTICAS:
 - "No sé qué hacer" sin pregunta directa → emotional (es expresión de impotencia).
 - "Doctor, qué hago" CON signo de interrogación → user_question.
 - "Tiene fiebre" en el primer turno SIN número → data (aporta sintoma principal).
+- **CUALQUIER mensaje que tenga signo de interrogación '?' o frase tipo "qué le doy/puedo dar/hago" → mixed o user_question** (NO data sola).
+- Si el mensaje tiene UN dato + UNA pregunta ("tiene 14, qué le doy?") → mixed con answer_data_too=True y user_question="qué le doy?".
+- Si el mensaje es solo respuesta corta a la última pregunta del bot ("14", "no", "sí", "ayer en la noche") → data.
 
 EMOCIÓN DETECTADA: dale el adjetivo más cercano (panic, fear, anxiety, frustration, skepticism, exhaustion, gratitude, neutral). Si combinas data + emoción leve → neutral está bien.
 
