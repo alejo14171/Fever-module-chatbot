@@ -111,6 +111,14 @@ def manager_route(state: State) -> ManagerRoute:
     if primary == "closing" and (rec_section == "done" or urgency_given == "yes"):
         return "close_conversation"
 
+    # POST-URGENCY EMOTIONAL CONTAINMENT: once the urgent referral has been
+    # delivered, any further panic / fear / questions should be contained
+    # with reassurance ("estás haciendo lo correcto, allá la van a atender"),
+    # NOT with more clinical data. This prevents the cascade-emotion failure
+    # where the bot kept asking for more symptoms after already recommending ER.
+    if urgency_given == "yes" and primary in {"emotional", "user_question", "mixed"}:
+        return "empathy_response"
+
     if primary == "emotional":
         return "empathy_response"
 
