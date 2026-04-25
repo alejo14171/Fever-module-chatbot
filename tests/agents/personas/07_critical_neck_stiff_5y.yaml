@@ -1,0 +1,26 @@
+category: critical
+dialect: rolo
+emotion: panic
+parent_role: mamá
+expected_routing: urgency
+notes: |
+  Niña 5 años con fiebre 40°C + rigidez de nuca + fotofobia. CRÍTICO inmediato.
+case:
+  patient_name: Valentina
+  age_months: 60
+  weight_kg: 18
+  temperature_celsius: 40.0
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 24
+  fever_started: ayer en la mañana
+  general_state: muy decaída, dolor de cabeza fuerte, le molesta la luz
+  neck_stiffness: "no puede agachar la cabecita, se queja cuando le toco el cuello"
+  feeding: no quiere comer
+  hydration: bebe poco
+  respiratory: sin tos
+  visual_signs: pálida
+  vaccination: completo
+  medical_history: sana
+  recent_medications: acetaminofén que no le hace efecto
+  chief_complaint: "doctor estoy preocupadísima, mi hija tiene fiebre alta y dolor de cabeza horrible"

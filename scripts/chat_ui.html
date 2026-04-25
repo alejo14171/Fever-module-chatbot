@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Fever Chatbot — local UI</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; }
+  header { background: #1e293b; padding: 0.75rem 1rem; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 1rem; }
+  header h1 { margin: 0; font-size: 1.1rem; }
+  header input[type=text] { flex: 1; background: #0f172a; color: #e2e8f0; border: 1px solid #334155; padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.85rem; }
+  header button { background: #3b82f6; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+  header button:hover { background: #2563eb; }
+  #status { font-size: 0.75rem; color: #94a3b8; }
+  #messages { flex: 1; overflow-y: auto; padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 0.8rem; }
+  .msg { max-width: 75%; padding: 0.75rem 1rem; border-radius: 14px; line-height: 1.45; white-space: pre-wrap; }
+  .msg.user { background: #1e3a8a; color: #f1f5f9; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .msg.bot { background: #1e293b; color: #e2e8f0; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #334155; }
+  .msg.system { background: transparent; color: #64748b; font-size: 0.8rem; text-align: center; align-self: center; font-style: italic; }
+  form { display: flex; gap: 0.5rem; padding: 0.75rem 1rem; background: #1e293b; border-top: 1px solid #334155; }
+  textarea { flex: 1; background: #0f172a; color: #e2e8f0; border: 1px solid #334155; padding: 0.6rem; border-radius: 6px; resize: none; font-family: inherit; font-size: 0.95rem; min-height: 2.4rem; }
+  button[type=submit] { background: #10b981; color: white; border: none; padding: 0 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
+  button[type=submit]:disabled { opacity: 0.5; cursor: not-allowed; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🩺 Fever Chatbot</h1>
+  <span id="status">conectándose…</span>
+  <input id="endpoint" type="text" value="http://localhost:2024" />
+  <input id="assistant" type="text" value="fever_chatbot" style="max-width: 14rem" />
+  <button id="newThread">Nuevo thread</button>
+</header>
+<div id="messages"></div>
+<form id="composer">
+  <textarea id="input" placeholder="Escribí como mamá/papá colombiano… (Enter para enviar, Shift+Enter para nueva línea)" rows="2" autofocus></textarea>
+  <button id="send" type="submit">Enviar</button>
+</form>
+<script>
+const endpointInput = document.getElementById('endpoint');
+const assistantInput = document.getElementById('assistant');
+const messagesEl = document.getElementById('messages');
+const form = document.getElementById('composer');
+const input = document.getElementById('input');
+const sendBtn = document.getElementById('send');
+const statusEl = document.getElementById('status');
+const newThreadBtn = document.getElementById('newThread');
+
+let threadId = null;
+
+function endpoint() { return endpointInput.value.replace(/\/+$/, ''); }
+function assistantId() { return assistantInput.value.trim() || 'fever_chatbot'; }
+
+function appendMsg(role, text) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  div.textContent = text;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+async function createThread() {
+  statusEl.textContent = 'creando thread…';
+  const r = await fetch(endpoint() + '/threads', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({})
+  });
+  if (!r.ok) throw new Error('thread creation failed: ' + r.status);
+  const data = await r.json();
+  threadId = data.thread_id;
+  statusEl.textContent = 'thread: ' + threadId.slice(0, 8) + '…';
+  appendMsg('system', 'Nuevo thread iniciado');
+}
+
+async function sendMessage(text) {
+  if (!threadId) await createThread();
+  appendMsg('user', text);
+  sendBtn.disabled = true;
+
+  const r = await fetch(endpoint() + '/threads/' + threadId + '/runs/wait', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      assistant_id: assistantId(),
+      input: { messages: [{ role: 'user', content: text }] }
+    })
+  });
+  if (!r.ok) {
+    appendMsg('system', '❌ Error ' + r.status + ': ' + await r.text());
+    sendBtn.disabled = false;
+    return;
+  }
+  const data = await r.json();
+  const msgs = data.messages || [];
+  const last = msgs[msgs.length - 1];
+  if (last && last.content) {
+    appendMsg('bot', last.content);
+  } else {
+    appendMsg('system', JSON.stringify(data, null, 2));
+  }
+  sendBtn.disabled = false;
+}
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  try { await sendMessage(text); }
+  catch (err) { appendMsg('system', '❌ ' + err.message); sendBtn.disabled = false; }
+});
+
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
+});
+
+newThreadBtn.addEventListener('click', async () => {
+  threadId = null;
+  messagesEl.innerHTML = '';
+  await createThread();
+});
+
+(async () => {
+  try {
+    const r = await fetch(endpoint() + '/ok');
+    if (r.ok) statusEl.textContent = 'conectado';
+    else statusEl.textContent = 'servidor responde pero /ok falló';
+  } catch (e) {
+    statusEl.textContent = 'no conecta — ¿el servidor está corriendo?';
+  }
+})();
+</script>
+</body>
+</html>

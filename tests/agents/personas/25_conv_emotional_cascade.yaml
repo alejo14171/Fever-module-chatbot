@@ -1,0 +1,32 @@
+category: conversational
+dialect: caleño
+emotion: panic
+parent_role: mamá
+expected_routing: urgency
+notes: |
+  Cascada emocional: mamá empieza preocupada, escala a pánico cuando llega a
+  describir síntomas (la nena tiene 2.5 meses con 38.7°C — criterio crítico).
+  El bot debe contener Y derivar urgente. Caso real de neonato con fiebre.
+case:
+  patient_name: Valentina
+  age_months: 2
+  weight_kg: 5.5
+  temperature_celsius: 38.7
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 4
+  fever_started: hace unas horas
+  general_state: irritable, llora más
+  feeding: rechaza el tetero
+  hydration: pañales normales
+  respiratory: respira normal
+  visual_signs: normal
+  vaccination: incompleto (recién nacida)
+  medical_history: sana
+  recent_medications: ninguno
+  cascade_pattern: |
+    Turno 1: preocupación moderada.
+    Turno 2: cuando le piden temperatura, responde "ay doctor 38.7, ¿es muy malo?".
+    Turno 3 en adelante: pánico creciente — interrumpe con "estoy temblando", "qué hago doctor".
+    El bot debe combinar contención emocional + información urgente clara.
+  chief_complaint: "mi bebé está caliente, mirá ve doctor"

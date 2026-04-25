@@ -1,0 +1,27 @@
+category: ambiguous
+dialect: costeño
+emotion: distracted
+parent_role: papá
+expected_routing: recommendation
+notes: |
+  Sin termómetro. Bot debe ofrecer evaluación táctil y manejo conservador.
+  El padre está distraído.
+case:
+  patient_name: Mateo
+  age_months: 30
+  weight_kg: 13
+  temperature_celsius: null
+  has_thermometer: no
+  can_get_thermometer: tal_vez
+  tactile_assessment: "tibio pero no extremadamente caliente"
+  fever_duration_hours: 6
+  fever_started: hace varias horas
+  general_state: jugando algo apagado
+  feeding: come pero menos
+  hydration: bebe agua
+  respiratory: sin síntomas
+  visual_signs: normal
+  vaccination: completo
+  medical_history: sano
+  recent_medications: ninguno
+  chief_complaint: "ajá doctor, el pelao tiene calor pero aquí no hay termómetro"

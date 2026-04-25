@@ -10,17 +10,15 @@ def test_red_flags_age_3_6_months_high_fever():
     assert "3_6m_fiebre_muy_alta" in flags
 
 def test_red_flags_general_state():
-    state = {
-        "general_symptoms": "decaido:si"
-    }
-    flags = detect_red_flags(state)
-    assert "decaimiento_severo" in flags
+    # decaido:si alone is NOT a red flag — could be mild. Only :severo flags.
+    state = {"general_symptoms": "decaido:si"}
+    assert "decaimiento_severo" not in detect_red_flags(state)
 
-    state = {
-        "general_symptoms": "juega:no, decaido:si"
-    }
-    flags = detect_red_flags(state)
-    assert "letargo_posible" in flags
+    state = {"general_symptoms": "decaido:severo"}
+    assert "decaimiento_severo" in detect_red_flags(state)
+
+    state = {"general_symptoms": "juega:no, decaido:si"}
+    assert "letargo_posible" in detect_red_flags(state)
 
 def test_red_flags_mental_status():
     state = {

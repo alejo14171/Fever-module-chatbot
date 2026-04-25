@@ -1,0 +1,25 @@
+category: critical
+dialect: neutral
+emotion: panic
+parent_role: papá
+expected_routing: urgency
+notes: |
+  Niño 2 años con fiebre alta + no responde como siempre + somnolencia extrema. CRÍTICO.
+case:
+  patient_name: Daniel
+  age_months: 24
+  weight_kg: 13
+  temperature_celsius: 39.8
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 36
+  fever_started: hace día y medio
+  general_state_critical: "está como dormido todo el tiempo, no responde cuando le hablo, no quiere ni mirarme"
+  feeding: no come
+  hydration: tomó muy poca agua
+  respiratory: respira normal
+  visual_signs: pálido, ojeras profundas
+  vaccination: completo
+  medical_history: sano
+  recent_medications: acetaminofén
+  chief_complaint: "doctor mi hijo está muy raro, como ido, y tiene fiebre"

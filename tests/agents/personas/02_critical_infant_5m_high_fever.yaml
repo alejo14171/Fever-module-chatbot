@@ -1,0 +1,25 @@
+category: critical
+dialect: rolo
+emotion: panic
+parent_role: papá
+expected_routing: urgency
+notes: |
+  Lactante 5m con fiebre 39.5°C. 3-6 meses con fiebre ≥39 = URGENTE.
+case:
+  patient_name: Sara
+  age_months: 5
+  weight_kg: 7.0
+  temperature_celsius: 39.5
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 18
+  fever_started: ayer en la tarde
+  general_state: decaída, no juega como siempre
+  feeding: rechaza el tetero
+  hydration: orina poco
+  respiratory: respira normal
+  visual_signs: pálida pero sin cianosis ni manchas
+  vaccination: completo para la edad
+  medical_history: sano
+  recent_medications: ninguno
+  chief_complaint: "doctor, mi hija de 5 meses tiene fiebre alta"

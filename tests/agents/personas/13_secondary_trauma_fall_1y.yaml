@@ -1,0 +1,29 @@
+category: secondary
+dialect: paisa
+emotion: calm_worry
+parent_role: mamá
+expected_routing: recommendation
+notes: |
+  Bebé 1 año se cayó del columpio hace 2h, ahora con fiebre 38.3°C. fever_context=trauma.
+  Bot debe preguntar signos neurológicos y mantener umbral bajo para urgencias.
+  El golpe estuvo presente PRIMERO; la fiebre es secundaria.
+case:
+  patient_name: Sofía
+  age_months: 14
+  weight_kg: 10
+  temperature_celsius: 38.3
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 1
+  fever_started: hace una hora más o menos
+  trauma_event: "se cayó del columpio del parque hace 2 horas, dio en la cabecita en el piso"
+  general_state: lloró fuerte después del golpe, después se calmó, ahora un poco somnolienta
+  feeding: tomó algo de leche
+  hydration: bebe
+  respiratory: normal
+  visual_signs: chichón en la frente
+  neurological: "no ha vomitado, los ojos se ven normales, le respondió cuando le hablé"
+  vaccination: completo
+  medical_history: sana
+  recent_medications: ninguno
+  chief_complaint: "mi nena se cayó del columpio y ahora tiene fiebre, eso será del golpe?"

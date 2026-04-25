@@ -1,0 +1,27 @@
+category: secondary
+dialect: caleño
+emotion: calm_worry
+parent_role: mamá
+expected_routing: urgency
+notes: |
+  Niño 2 años post-apendicectomía hace 5 días + fiebre 38.5°C. fever_context=post_surgery.
+  Bot debe pedir contactar al cirujano (sospecha de complicación post-Qx).
+case:
+  patient_name: Andrés
+  age_months: 24
+  weight_kg: 12
+  temperature_celsius: 38.5
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 4
+  fever_started: hace 4 horas
+  general_state: incómodo, se queja cuando lo mueven
+  feeding: come poco
+  hydration: bebe
+  respiratory: sin síntomas
+  visual_signs: la herida se ve un poquito roja
+  surgery_event: "le hicieron cirugía de apendicitis hace 5 días, salimos del hospital hace 3"
+  vaccination: completo
+  medical_history: sano antes de la cirugía
+  recent_medications: ibuprofeno que le mandaron del hospital
+  chief_complaint: "mi'jo lo operaron de apendicitis hace 5 días y ahora tiene fiebre"

@@ -1,0 +1,26 @@
+category: secondary
+dialect: rolo
+emotion: calm_worry
+parent_role: papá
+expected_routing: recommendation
+notes: |
+  Niño 3 años con cardiopatía congénita corregida + fiebre 38.5°C. fever_context=base_disease.
+  Bot debe sugerir contactar al cardiólogo de cabecera además del manejo estándar.
+case:
+  patient_name: Gabriel
+  age_months: 36
+  weight_kg: 13
+  temperature_celsius: 38.5
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 8
+  fever_started: esta mañana temprano
+  general_state: jugando un poco más despacio que de costumbre
+  feeding: come poco
+  hydration: bebe bien
+  respiratory: tos leve
+  visual_signs: normal
+  vaccination: completo
+  medical_history: "tiene cardiopatía congénita corregida con cirugía hace 2 años, sigue con cardiólogo"
+  recent_medications: acetaminofén media hora atrás
+  chief_complaint: "doctor mi hijo es operado del corazón, le dio fiebre, qué hago"

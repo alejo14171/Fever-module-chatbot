@@ -1,0 +1,31 @@
+category: conversational
+dialect: paisa
+emotion: panic
+parent_role: mamá
+expected_routing: recommendation
+notes: |
+  Mamá responde con emoción en lugar de datos. Caso reproduce exactamente el bug
+  reportado por el usuario: bot pregunta temp, padre responde con miedo.
+  El bot DEBE contener primero, después retomar.
+case:
+  patient_name: Tomás
+  age_months: 36
+  weight_kg: 14
+  temperature_celsius: 38.5
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 8
+  fever_started: hoy en la mañana
+  general_state: jugando algo apagado
+  feeding: come poco
+  hydration: bebe normal
+  respiratory: sin tos
+  visual_signs: normal
+  vaccination: completo
+  medical_history: no
+  recent_medications: no
+  emotional_pattern: |
+    En lugar de responder preguntas técnicas, intercala 2-3 frases emocionales
+    como "pero yo estoy preocupado, qué hago" o "es que me da miedo doctor".
+    Después de la contención, sí responde la pregunta.
+  chief_complaint: "doctor mi pelado tiene fiebre, lo veo decaído"

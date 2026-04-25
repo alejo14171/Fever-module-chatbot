@@ -1,0 +1,27 @@
+category: critical
+dialect: neutral
+emotion: panic
+parent_role: papá
+expected_routing: urgency
+notes: |
+  Niño 2 años con convulsión febril hace 30 minutos. CRÍTICO inmediato.
+  El simulador debe contar la convulsión cuando le pregunten síntomas o luego de varios turnos.
+case:
+  patient_name: Lucas
+  age_months: 24
+  weight_kg: 12
+  temperature_celsius: 39.2
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 8
+  fever_started: esta mañana
+  general_state: ahora despierto pero raro, antes tembló todo el cuerpo unos 2 minutos
+  convulsion_event: "hace media hora le tembló todo el cuerpo, los ojos se le pusieron en blanco, duró como 2 minutos"
+  feeding: no ha comido nada hoy
+  hydration: tomó algo de jugo
+  respiratory: sin tos
+  visual_signs: pálido después del temblor
+  vaccination: completo
+  medical_history: sano, nunca había convulsionado
+  recent_medications: nada
+  chief_complaint: "doctor mi hijo tembló todo el cuerpo y tiene fiebre, qué hago"

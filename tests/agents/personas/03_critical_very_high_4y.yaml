@@ -1,0 +1,25 @@
+category: critical
+dialect: paisa
+emotion: exhausted
+parent_role: mamá
+expected_routing: urgency
+notes: |
+  Niño 4 años con fiebre 41°C. ≥40°C cualquier edad = URGENTE.
+case:
+  patient_name: Tomás
+  age_months: 48
+  weight_kg: 16
+  temperature_celsius: 41.0
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 30
+  fever_started: anteayer en la noche
+  general_state: muy decaído, no quiere jugar, somnoliento
+  feeding: no come desde anoche
+  hydration: toma poquita agua
+  respiratory: tos leve seca
+  visual_signs: rojo de la fiebre, sin manchas
+  vaccination: completo
+  medical_history: alergia al maní, nada más
+  recent_medications: acetaminofén anoche y esta mañana, no le baja
+  chief_complaint: "mi pelao lleva un día y medio con fiebre y ahora amaneció con 41"

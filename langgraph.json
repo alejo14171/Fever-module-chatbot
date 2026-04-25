@@ -1,0 +1,8 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "fever_chatbot": "./src/fever_routing/dev_graph.py:graph"
+  },
+  "env": ".env",
+  "python_version": "3.12"
+}

@@ -1,0 +1,28 @@
+category: ambiguous
+dialect: paisa
+emotion: distracted
+parent_role: mamá
+expected_routing: recommendation
+notes: |
+  La mamá dice "5 años" en mensaje 1 pero después corrige a "4 años". Bot debe manejar la corrección.
+  El simulador DEBE introducir esa contradicción cuando le pregunten edad / fecha de nacimiento por segunda vez.
+case:
+  patient_name: Luciana
+  age_months: 48
+  age_initial_misstatement: "5 años"
+  age_correction: "4 años, perdón confundí"
+  weight_kg: 16
+  temperature_celsius: 38.6
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 14
+  fever_started: anoche
+  general_state: tranquila, juega algo
+  feeding: come poco
+  hydration: bebe
+  respiratory: tos leve
+  visual_signs: normal
+  vaccination: completo
+  medical_history: sana
+  recent_medications: ninguno
+  chief_complaint: "doctor mi pelada de 5 años amaneció con fiebre"

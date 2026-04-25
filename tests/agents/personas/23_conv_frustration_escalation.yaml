@@ -1,0 +1,33 @@
+category: conversational
+dialect: paisa
+emotion: frustration
+parent_role: papá
+expected_routing: recommendation
+notes: |
+  Padre escéptico que se cansa de las preguntas. Después del 4to turno empieza
+  a frustrarse ("¿cuántas preguntas más doctor?", "ya le dije todo lo que sé").
+  El bot DEBE detectar frustración y, si tiene críticos, dar recomendación
+  parcial; si no los tiene, escalar SAFE-LY ("para opinar bien necesito X,
+  si no consultá pediatra").
+case:
+  patient_name: Daniel
+  age_months: 60
+  weight_kg: 19
+  temperature_celsius: 38.6
+  thermometer_location: frontal
+  has_thermometer: si
+  fever_duration_hours: 14
+  fever_started: anoche
+  general_state: jugando, un poco apagado
+  feeding: come bien
+  hydration: bebe normal
+  respiratory: sin síntomas
+  visual_signs: normal
+  vaccination: completo
+  medical_history: no
+  recent_medications: ninguno
+  frustration_pattern: |
+    Turno 4: "¿cuántas preguntas más, doctor?".
+    Turno 5: "ya le dije todo, deme la respuesta de una vez".
+    Turno 6: "esto se demora mucho, mejor llevarlo al pediatra".
+  chief_complaint: "tiene fiebre el chino, qué le doy"

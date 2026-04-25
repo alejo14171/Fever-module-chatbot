@@ -1,0 +1,30 @@
+category: conversational
+dialect: rolo
+emotion: anxiety
+parent_role: mamá
+expected_routing: recommendation
+notes: |
+  Mamá hace preguntas directas al bot ("¿es grave?", "¿qué hago?") en medio
+  del checklist. El bot DEBE responderlas con honestidad (info parcial o
+  "necesito X dato"), no evadir y seguir preguntando como robot.
+case:
+  patient_name: Mariana
+  age_months: 48
+  weight_kg: 16
+  temperature_celsius: 38.8
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 16
+  fever_started: anoche tarde
+  general_state: tranquila pero más quieta
+  feeding: come poco
+  hydration: bebe
+  respiratory: tos leve
+  visual_signs: normal
+  vaccination: completo
+  medical_history: no
+  recent_medications: acetaminofén una vez
+  question_pattern: |
+    En el turno 3 pregunta "¿es grave doctor?". En el turno 5 pregunta
+    "¿qué le doy?". En el turno 7 pregunta "¿debo llevarlo al hospital?".
+  chief_complaint: "doctor mi hija tiene fiebre, ¿me podés ayudar?"

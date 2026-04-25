@@ -1,0 +1,25 @@
+category: home
+dialect: paisa
+emotion: calm_worry
+parent_role: mamá
+expected_routing: recommendation
+notes: |
+  Niño 5 años con fiebre 38.5°C 12h, buen estado general. Manejo en casa típico.
+case:
+  patient_name: Santiago
+  age_months: 60
+  weight_kg: 19
+  temperature_celsius: 38.5
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 12
+  fever_started: anoche
+  general_state: jugando bien, un poco más calmado de lo normal
+  feeding: come, sólo un poco menos
+  hydration: bebe normal
+  respiratory: mocos leves, sin dificultad
+  visual_signs: normal
+  vaccination: completo
+  medical_history: sano
+  recent_medications: ninguno aún
+  chief_complaint: "mijo amaneció con fiebrecita y mocos, qué le doy"

@@ -79,15 +79,19 @@ def calculate_checklist_completion(state: State) -> dict:
 
         return field_value not in incomplete_values
 
-    # Helper para verificar temperatura: consideramos válida si tiene temperatura medida O evaluación táctil
+    # Temperatura: medida = ideal. Tactile sólo cuenta si NO hay termómetro disponible.
+    # Si el padre tiene termómetro pero aún no dio número, NO consideramos temp completa
+    # — el inquiry seguirá pidiendo el valor exacto.
     def has_temperature_data():
         has_measured_temp = is_complete(state.get("temperature", ""))
-        has_tactile_assessment = is_complete(state.get("tactile_fever_assessment", ""))
-        debug_print(f"  ℹ️ has_measured_temp: {has_measured_temp}")
-        debug_print(f"  ℹ️ has_tactile_assessment: {has_tactile_assessment}")
-        debug_print(f"  ℹ️ temperature: {state.get('temperature', '')}")
-        debug_print(f"  ℹ️ tactile_fever_assessment: {state.get('tactile_fever_assessment', '')}")
-        return has_measured_temp or has_tactile_assessment
+        if has_measured_temp:
+            return True
+        has_tactile = is_complete(state.get("tactile_fever_assessment", ""))
+        if not has_tactile:
+            return False
+        # Tactile only acceptable when thermometer unavailable.
+        has_thermometer = state.get("has_thermometer", "").lower()
+        return has_thermometer == "no"
 
     # Construir checklist con logging de valores "no"
     medication_given_val = state.get("medication_given", "")
@@ -289,8 +293,9 @@ def detect_red_flags(state: State) -> list[str]:
         red_flags.append("convulsiones")
         debug_print(f"  🚨 CRITICAL: Convulsiones detected in symptoms!")
 
-    # RED FLAG 4: Estado general comprometido / Alteración del estado mental
-    if "decaido:si" in general_symp or "decaido:severo" in general_symp:
+    # RED FLAG 4: Estado general comprometido — solo "severo" o "decaído + no juega"
+    # cuentan como red flag. "decaido:leve" o "más quietico" NO son red flag.
+    if "decaido:severo" in general_symp:
         red_flags.append("decaimiento_severo")
     if "juega:no" in general_symp and "decaido:si" in general_symp:
         red_flags.append("letargo_posible")
@@ -486,7 +491,9 @@ def assess_urgency(state: State) -> dict:
     }
 
 
-def triage_route(state: State) -> Literal["inquiry", "recommendation", "urgency_recommendation"]:
+def triage_route(
+    state: State,
+) -> Literal["inquiry", "recommendation", "urgency_recommendation", "answer_question"]:
     """
     Determina el siguiente paso en el triaje basándose en:
     0. URGENCIA INMEDIATA: Si temp >38°C AND edad <3 meses → urgency_recommendation
@@ -500,6 +507,13 @@ def triage_route(state: State) -> Literal["inquiry", "recommendation", "urgency_
 
     Esta es la función de ROUTING del grafo.
     """
+
+    # DECISIÓN 0X: si el padre hizo una pregunta directa además de aportar data,
+    # después de extraer respondemos la pregunta antes de seguir el script.
+    pending_q = state.get("pending_user_question", "") or ""
+    if pending_q.strip():
+        debug_print(f"📩 pending user question after receptor → answer_question: {pending_q[:60]}")
+        return "answer_question"
 
     # DECISIÓN 0A: Si ya estamos en urgency_recommendation, continuar ahí
     urgency_given = state.get("urgency_recommendation_given", "")
@@ -606,6 +620,13 @@ def triage_route(state: State) -> Literal["inquiry", "recommendation", "urgency_
 
     debug_print(f"\n🔑 DATOS CRÍTICOS: {'✅ COMPLETOS (edad, temp, duración)' if checklist_status['has_critical_data'] else '❌ INCOMPLETOS'}")
     debug_print("=" * 80)
+
+    # PARTIAL-DATA SHORTCUT: if inquiry signaled it has nothing more to ask,
+    # advance to recommendation/urgency with what we have. Safety still applies
+    # (urgency was already handled above for critical/urgent cases).
+    if state.get("recommendation_with_partial_data") == "yes":
+        debug_print("✅ DECISIÓN: partial-data flag → RECOMMENDATION")
+        return "recommendation"
 
     # DECISIÓN 1: Checklist suficientemente completo (weighted score ≥0.70) → RECOMMENDATION
     # Uses ready_for_recommendation flag (all critical + ≥60% important)

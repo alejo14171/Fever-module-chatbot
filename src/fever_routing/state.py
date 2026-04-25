@@ -81,3 +81,14 @@ class State(MessagesState):
     fallback_values: str  # JSON: valores por defecto si RECEPTOR no extrae
     questions_asked: str  # JSON: lista de campos ya preguntados (evita repetir)
     no_fever_clarification_given: str  # "yes" si ya dimos la aclaración de "NO es fiebre"
+
+    # ========== CONTEXTO DE LA FIEBRE (NUEVO) ==========
+    # primary | trauma | base_disease | post_vaccine | post_surgery | unknown
+    fever_context: str
+
+    # ========== ROUTER CONVERSACIONAL (conversation_manager) ==========
+    last_intent: str  # data | emotional | user_question | evasion | mixed | closing
+    detected_emotion: str  # panic | fear | anxiety | frustration | skepticism | exhaustion | gratitude | neutral
+    pending_user_question: str  # the parent's verbatim question, if any
+    short_acknowledgement: str  # 1-line warm seed for empathy / answer branches
+    recommendation_with_partial_data: str  # "yes" if checklist exhausted but data thin

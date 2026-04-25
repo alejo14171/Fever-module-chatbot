@@ -1,0 +1,27 @@
+category: critical
+dialect: caleño
+emotion: panic
+parent_role: mamá
+expected_routing: urgency
+notes: |
+  Lactante <3 meses con fiebre axilar 38.5°C. Criterio crítico SIEMPRE va a urgencias.
+  Mamá en pánico — el bot debe ser firme (vayan ya) pero contenedor.
+case:
+  patient_name: Mateo
+  age_months: 2
+  weight_kg: 5.2
+  temperature_celsius: 38.5
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 6
+  fever_started: hace unas 6 horas en la madrugada
+  general_state: irritable, llora más de lo normal
+  feeding: tomando teta poco, normalmente come bien
+  hydration: normal
+  respiratory: sin tos ni dificultad
+  visual_signs: sin manchas, color normal
+  vaccination: incompleto (apenas recién nacido, vacunas BCG y hep B)
+  medical_history: sano
+  recent_medications: ninguno
+  recent_antibiotics: ninguno
+  chief_complaint: "mi bebé recién nacido tiene fiebre y no sé qué hacer"

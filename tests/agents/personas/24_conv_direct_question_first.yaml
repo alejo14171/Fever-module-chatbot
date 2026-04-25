@@ -1,0 +1,30 @@
+category: conversational
+dialect: costeño
+emotion: panic
+parent_role: mamá
+expected_routing: recommendation
+notes: |
+  Mamá abre con pregunta directa "¿qué hago?" sin dar datos. El bot DEBE
+  responder con contención + pedir un dato específico, NO ignorar la pregunta.
+  Después la mamá empieza a colaborar gota-a-gota.
+case:
+  patient_name: Sofía
+  age_months: 30
+  weight_kg: 13
+  temperature_celsius: 38.4
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 10
+  fever_started: en la madrugada
+  general_state: irritable
+  feeding: come poco
+  hydration: bebe poco
+  respiratory: tos leve
+  visual_signs: normal
+  vaccination: completo
+  medical_history: no
+  recent_medications: ninguno
+  opening_pattern: |
+    Su primer mensaje es SOLO una pregunta: "ay doctor, ¿qué hago, qué hago?".
+    Sin dato clínico. Después colabora cuando la contienen.
+  chief_complaint: "ay doctor, ¿qué hago, qué hago?"

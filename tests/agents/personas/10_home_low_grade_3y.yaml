@@ -1,0 +1,26 @@
+category: home
+dialect: paisa
+emotion: skeptical
+parent_role: papá
+expected_routing: recommendation
+notes: |
+  Niño 3 años con 37.7°C (febrícula, NO es fiebre). Bot debe aclarar que no es fiebre.
+  Papá un poco escéptico, "esto no es nada".
+case:
+  patient_name: Emiliano
+  age_months: 36
+  weight_kg: 14
+  temperature_celsius: 37.7
+  thermometer_location: frontal
+  has_thermometer: si
+  fever_duration_hours: 4
+  fever_started: hace unas 4 horas
+  general_state: jugando como siempre
+  feeding: come bien
+  hydration: bebe normal
+  respiratory: sin síntomas
+  visual_signs: normal
+  vaccination: completo
+  medical_history: sano
+  recent_medications: ninguno
+  chief_complaint: "mi mujer dice que el chino tiene fiebre, le sale 37.7, eso será fiebre o qué?"

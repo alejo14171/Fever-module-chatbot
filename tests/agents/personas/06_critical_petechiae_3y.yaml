@@ -1,0 +1,26 @@
+category: critical
+dialect: paisa
+emotion: distracted
+parent_role: mamá
+expected_routing: urgency
+notes: |
+  Niño 3 años con rash no blanqueable (petequias) + fiebre. CRÍTICO inmediato (sospecha meningocócica).
+  La mamá está distraída — puede mencionar el rash de forma casual.
+case:
+  patient_name: Mariana
+  age_months: 36
+  weight_kg: 14
+  temperature_celsius: 39.5
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 20
+  fever_started: ayer al mediodía
+  general_state: decaída
+  feeding: come poquito
+  hydration: bebe agua
+  respiratory: sin tos
+  visual_signs_critical: "le salieron unas manchitas rojas en las piernas que cuando uno presiona el vidrio no desaparecen"
+  vaccination: completo
+  medical_history: sana
+  recent_medications: acetaminofén
+  chief_complaint: "doctor mi pelada está con fiebre y le salieron unas manchitas raras"

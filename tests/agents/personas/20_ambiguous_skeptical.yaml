@@ -1,0 +1,26 @@
+category: ambiguous
+dialect: paisa
+emotion: skeptical
+parent_role: papá
+expected_routing: recommendation
+notes: |
+  Padre escéptico que minimiza, pero el caso es relevante (fiebre 39°C 18h en niño 18 meses).
+  Bot debe insistir en datos críticos sin volverse robótico.
+case:
+  patient_name: Maximiliano
+  age_months: 18
+  weight_kg: 11
+  temperature_celsius: 39.0
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 18
+  fever_started: ayer
+  general_state: un poco apagado pero igual juega
+  feeding: come menos
+  hydration: bebe normal
+  respiratory: mocos leves
+  visual_signs: normal
+  vaccination: completo
+  medical_history: sano
+  recent_medications: acetaminofén
+  chief_complaint: "mi señora me obliga a preguntar pero esto es una fiebrecita boba, igual le doy dolex y ya"

@@ -1,0 +1,25 @@
+category: home
+dialect: costeño
+emotion: grateful
+parent_role: mamá
+expected_routing: recommendation
+notes: |
+  Niño 7 años con fiebre 24h, ya tomó acetaminofén. Mamá agradecida que pregunta dosis siguiente.
+case:
+  patient_name: Camila
+  age_months: 84
+  weight_kg: 22
+  temperature_celsius: 39.0
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 24
+  fever_started: ayer en la mañana
+  general_state: cansada pero alerta, ve TV
+  feeding: come poco pero come
+  hydration: bebe bien
+  respiratory: tos seca leve
+  visual_signs: normal
+  vaccination: completo
+  medical_history: sana
+  recent_medications: acetaminofén 5ml hace 8 horas
+  chief_complaint: "doctor mi vida, tengo a mi pelada con fiebre desde ayer y le di dolex hace ya un rato, ¿le doy más?"

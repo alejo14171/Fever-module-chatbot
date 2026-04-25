@@ -1,0 +1,26 @@
+category: home
+dialect: rolo
+emotion: calm_worry
+parent_role: mamá
+expected_routing: recommendation
+notes: |
+  Niña 4 años con fiebre 38.2°C 24h después de vacunas. Caso fever_context = post_vaccine.
+case:
+  patient_name: Isabella
+  age_months: 48
+  weight_kg: 17
+  temperature_celsius: 38.2
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 18
+  fever_started: ayer en la noche, después de las vacunas
+  vaccination_event: "ayer en la mañana le pusieron las vacunas de los 4 años"
+  general_state: un poco molesta pero juega
+  feeding: come bien
+  hydration: bebe normal
+  respiratory: sin síntomas
+  visual_signs: enrojecimiento leve donde la pinchada
+  vaccination: completo
+  medical_history: sana
+  recent_medications: nada aún
+  chief_complaint: "doctor, ayer le pusieron las vacunas de los 4 años y amaneció con fiebre, ¿es normal?"

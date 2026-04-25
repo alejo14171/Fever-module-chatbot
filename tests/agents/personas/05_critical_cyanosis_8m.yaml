@@ -1,0 +1,25 @@
+category: critical
+dialect: costeño
+emotion: panic
+parent_role: abuela
+expected_routing: urgency
+notes: |
+  Bebé 8m con dificultad respiratoria + cianosis perioral. CRÍTICO inmediato.
+case:
+  patient_name: Liam
+  age_months: 8
+  weight_kg: 8.5
+  temperature_celsius: 39.0
+  thermometer_location: axilar
+  has_thermometer: si
+  fever_duration_hours: 12
+  fever_started: anoche
+  general_state: muy decaído, no llora con fuerza
+  feeding: no quiere tetero
+  hydration: pañales secos hace muchas horas
+  respiratory_critical: "respira muy rápido, se le hunden las costillitas, el labio se le ve morado"
+  visual_signs: labios y dedos azulados
+  vaccination: completo
+  medical_history: sano
+  recent_medications: gotitas de paracetamol
+  chief_complaint: "mami el nieto mío respira raro y está como morado"
