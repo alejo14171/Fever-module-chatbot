@@ -100,8 +100,11 @@ def calculate_acetaminofen_dose(weight_kg: str, age_months: str) -> dict:
             "warning": "Peso fuera de rango esperado. Consultar con pediatra.",
             "error": True,
         }
-    dose_mg = weight * 15
-    max_daily_mg = weight * 60
+    # Use 15 mg/kg per dose, but cap at the safe daily/dose limits.
+    # Floor (not round) to never exceed 15 mg/kg.
+    import math
+    dose_mg = math.floor(weight * 15)
+    max_daily_mg = math.floor(weight * 60)
     dose_ml_suspension = round(dose_mg / 32, 1)
     dose_ml_drops = round(dose_mg / 100, 1)
     warning = None

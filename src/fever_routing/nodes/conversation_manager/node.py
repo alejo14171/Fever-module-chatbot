@@ -111,14 +111,15 @@ def manager_route(state: State) -> ManagerRoute:
     if primary == "closing" and (rec_section == "done" or urgency_given == "yes"):
         return "close_conversation"
 
-    if primary == "user_question":
-        return "answer_question"
-
     if primary == "emotional":
         return "empathy_response"
 
     if primary == "evasion":
         return "reframe_question"
 
-    # data / mixed / unknown → receptor (clinical pipeline).
+    # user_question / data / mixed / unknown → receptor first.
+    # The receptor is idempotent: if there's no new data it returns nothing.
+    # Then triage_route sees pending_user_question and routes to answer_question
+    # AFTER any data has been extracted. This prevents losing age/temp/etc.
+    # when the parent bundles a question with data ("tiene 2 meses, ¿es grave?").
     return "receptor"

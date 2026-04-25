@@ -58,8 +58,16 @@ def _sync_questions_asked(state: State, questions_asked: list[str]) -> list[str]
     seen = set(questions_asked)
     for checklist_field, state_field in CHECKLIST_TO_STATE.items():
         value = state.get(state_field, "")
-        if value and value not in {"desconocido", "0"}:
+        if value and value not in {"desconocido", "0", "no_medida"}:
             seen.add(checklist_field)
+    # If we have age, also consider fever_check answered (we know the patient).
+    if state.get("patient_age_months") and state.get("patient_age_months") not in {"desconocido", "0"}:
+        seen.add("fever_check")
+    # If we already have temperature OR tactile_fever_assessment, fever_check is done.
+    if state.get("temperature") and state.get("temperature") not in {"desconocido", "no_medida", "0"}:
+        seen.add("fever_check")
+    if state.get("tactile_fever_assessment"):
+        seen.add("fever_check")
     return sorted(seen)
 
 
