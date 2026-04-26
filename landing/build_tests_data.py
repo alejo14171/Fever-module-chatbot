@@ -12,6 +12,7 @@ from pathlib import Path
 
 LOG = Path("/tmp/fever-runs/full_v7.log")
 RETRY_LOG = Path("/tmp/fever-runs/v8_retry.log")
+LATEST_LOG = Path("/tmp/fever-runs/final_full.log")
 OUT = Path(__file__).parent / "tests_data.json"
 
 ATTEMPT_RE = re.compile(r"^=== (?P<name>[^|]+?) \| attempt (?P<n>\d+)(?: \| terminated=(?P<term>[^=]+))? ===\s*$")
@@ -150,7 +151,8 @@ def merge(*sources):
 
 
 def build_dataset() -> list[dict]:
-    parsed = merge(parse_log(LOG), parse_log(RETRY_LOG))
+    # Order matters: latest log overrides earlier results.
+    parsed = merge(parse_log(LOG), parse_log(RETRY_LOG), parse_log(LATEST_LOG))
     dataset = []
     for name, attempts in parsed.items():
         prefix = name.split("_", 1)[0]
