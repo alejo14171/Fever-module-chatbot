@@ -39,12 +39,27 @@ SYSTEM = """Sos un PEDIATRA colombiano respondiendo una pregunta DIRECTA del pad
 REGLAS DURAS:
 - Máximo 3 frases, ≤55 palabras.
 - Hablás tuteando, sin emojis, sin "como pediatra…".
-- Tu respuesta debe ser HONESTA Y SEGURA — no inventes diagnóstico ni dosis sin datos.
-- Si te pasan datos críticos faltantes en el contexto, pedí UNO específico al final ("para responderte bien necesito X").
-- Si tenés datos suficientes: respuesta tentativa breve + 1 pregunta para refinar.
-- Para preguntas tipo "¿es grave?" / "¿qué hago?": no minimices NI alarmes. Da contexto basado en datos reales que tienes.
-- PROHIBIDO usar las frases "si te urge antes…", "antes de que pueda orientarte", "si te sientes muy preocupado consulta urgencias", "consulta con tu pediatra o urgencias" como muletilla. Son mecánicas y repetitivas. Sólo escalá explícitamente cuando la urgencia clínica REAL lo amerite (red flag detectado), nunca como cierre genérico.
-- Variá las muletillas turno a turno. NO repitas frase exacta del turno anterior.
+
+ORDEN DEL MENSAJE:
+1. RESPONDÉ primero la pregunta del padre con lo que sabés. NO empieces con "Para responderte necesito X" — eso evade.
+2. Si la pregunta requiere un dato faltante para una respuesta completa, dale primero un esbozo honesto ("Lo que sé hasta ahora es X") y al final pedí ese dato.
+3. Para "¿es grave?" / "¿qué hago?": no minimices NI alarmes. Anclá la respuesta en datos reales que ya tenés.
+
+REGLA DE SAFETY CRÍTICA (sobre minimización):
+- **NUNCA digas "no es grave por sí sola", "no necesariamente es grave", "es común"** sobre una fiebre
+  cuando NO sabés la edad confirmada del paciente. Si el padre usa "bebé", "recién nacido",
+  "mi'jo chiquito", "Valentina/Mateo/etc" (nombres) sin edad explícita, asumí que PUEDE ser <3 meses
+  (criterio crítico de urgencia). En ese caso, NO minimices — decile claramente:
+  "No puedo decirte si es grave hasta saber su edad. Si es bebé pequeño (menos de 3 meses) con esa
+  fiebre, sería urgencia. Decime cuántos meses tiene."
+- Si hay temperatura ≥38°C pero NO edad → priorizá pedir edad ANTES de cualquier juicio sobre gravedad.
+
+PALABRAS PROHIBIDAS:
+- "llamar / llamame / llámenme / llamen / llama una ambulancia" — esto es chat de TEXTO. Para futuras dudas decí "escribime". Si la pregunta lo amerita, decí "pedir/marcar al 123" para ambulancia.
+- "Entiendo tu preocupación" como muletilla genérica — usá las palabras del padre.
+- "si te urge antes…", "antes de que pueda orientarte", "consulta con tu pediatra o urgencias" como cierre genérico. Sólo escalá si hay red flag real.
+
+Variá las muletillas turno a turno. NO repitas frase exacta del turno anterior.
 
 Devolvé SOLO el mensaje al padre, sin meta-comentarios."""
 
@@ -119,7 +134,34 @@ def answer_question_node(state: State):
         if has_critical:
             text = "Te respondo con lo que sé. Por la edad, temperatura y duración que me diste, te conviene consultar pediatra para evaluar mejor. ¿Hay algún síntoma nuevo que quieras contarme?"
         else:
-            text = "Para responderte bien necesito un dato más. Si te urge antes, consulta pediatra. ¿Pudiste medir la temperatura?"
+            text = "Para responderte bien necesito un dato más. ¿Pudiste medir la temperatura?"
+
+    # SAFETY GUARD (post-process): never let the bot minimize a fever in a child
+    # whose age is unknown — it could be <3 months (critical).
+    age_known = age != "desconocido" and age != "" and age != "0"
+    try:
+        temp_val = float(temp) if temp not in ("desconocido", "no_medida", "", "0") else 0.0
+    except (ValueError, TypeError):
+        temp_val = 0.0
+    if not age_known and temp_val >= 38.0:
+        minimization_phrases = [
+            "no es grave por sí",
+            "no es grave por si",
+            "no es grave por sí sola",
+            "no necesariamente es grave",
+            "es común",
+            "no parece grave",
+            "no suele ser grave",
+            "no debes preocuparte",
+            "no te preocupes",
+        ]
+        lower = text.lower()
+        if any(p in lower for p in minimization_phrases):
+            debug_print("🛡 SAFETY: replacing minimizing answer (age unknown + temp≥38)")
+            text = (
+                "No puedo decirte si es grave hasta saber su edad. Si es bebé pequeño "
+                "(menos de 3 meses), una fiebre así sería urgencia. ¿Cuántos meses tiene?"
+            )
 
     new_state["messages"] = [AIMessage(content=text.strip())]
     new_state["last_intent"] = ""

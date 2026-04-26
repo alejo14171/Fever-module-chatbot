@@ -423,13 +423,25 @@ def inquiry_node(state: State):
     if next_q is None:
         next_q = get_next_question(state, candidate_missing)
 
-    # Out-of-scope graceful exit: parent's case isn't fever — derive politely
-    # and end the clinical pipeline. We send the LLM-crafted message and mark
-    # the conversation as done so subsequent turns just close.
+    # Out-of-scope graceful exit. Important guard: if we ALREADY have all 3
+    # critical fields (age + temp + duration), this isn't really off-scope —
+    # the parent just wants a fast answer. Switch to partial-data recommendation
+    # so the bot delivers the home-care advice instead of derailing to off_scope.
     if next_q.get("field") == "out_of_scope_exit":
-        from langchain_core.messages import AIMessage as _AIMessage
+        if age_known and temp_known and duration_known:
+            debug_print("🔁 inquiry: critical data complete — overriding off_scope to partial recommendation")
+            new_state["recommendation_with_partial_data"] = "yes"
+            new_state["last_inquiry_question"] = ""
+            new_state["expected_fields"] = "[]"
+            new_state["fallback_values"] = "{}"
+            new_state["messages"] = [AIMessage(
+                content="Listo, con lo que me has contado puedo darte una recomendación. ¿Hay algún otro síntoma o detalle que quieras contarme antes?"
+            )]
+            new_state["completeness_score"] = f"{checklist_status['score']:.2f}"
+            new_state["missing_items"] = ", ".join(checklist_status["missing"])
+            return new_state
         debug_print("🚪 inquiry: out_of_scope exit chosen by adaptive picker")
-        new_state["messages"] = [_AIMessage(content=next_q["question"])]
+        new_state["messages"] = [AIMessage(content=next_q["question"])]
         new_state["recommendation_section"] = "done"
         new_state["recommended_action"] = "off_scope"
         new_state["last_inquiry_question"] = ""

@@ -131,11 +131,25 @@ def _generate_assessment(state: State) -> str:
         )
         return response.content if hasattr(response, "content") else str(response)
     except Exception as exc:
-        debug_print(f"❌ Recommendation LLM error: {exc}")
-        return (
-            "No pude generar la recomendación en este momento. "
-            "Te sugiero contactar a tu pediatra para una evaluación presencial."
-        )
+        debug_print(f"❌ Recommendation LLM error: {exc} — retrying once")
+        try:
+            response = _llm.invoke(
+                [
+                    ("system", formatted),
+                    ("user", "Genera ahora la recomendación corta para el padre."),
+                ]
+            )
+            return response.content if hasattr(response, "content") else str(response)
+        except Exception as exc2:
+            debug_print(f"❌ Recommendation retry also failed: {exc2}")
+            # Cálido, no robótico, y útil: recomendación mínima segura.
+            patient_name = ctx.get("patient_name", "tu peque")
+            return (
+                f"Te ayudo con lo que tengo: con la fiebre de {patient_name}, mantenelo hidratado, "
+                f"con ropa ligera y observalo de cerca. Si aparece dificultad para respirar, "
+                f"manchitas que no se quitan al presionar, vómito repetido o decaimiento muy fuerte, "
+                f"andate a urgencias. Cualquier duda, escribime de nuevo."
+            )
 
 
 def _answer_followup(state: State, prior_assessment: str, user_message: str) -> str:

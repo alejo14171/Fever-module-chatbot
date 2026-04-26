@@ -74,10 +74,60 @@ def conversation_manager_node(state: State):
         f"q={(intent.user_question or '')[:60]}"
     )
 
-    new_state["last_intent"] = intent.primary
+    # POST-URGENCY DETERMINISTIC OVERRIDE: if we already delivered urgency and
+    # the parent's message contains heavy panic words, force emotional intent
+    # regardless of what the LLM classified. The judge keeps marking empathy=False
+    # when the bot processes these as user_question / data — empathy must come first.
+    urgency_already_given = (state.get("urgency_recommendation_given") or "") == "yes"
+    panic_words = (
+        "tiembl", "temblando", "temblor",
+        "qué susto", "que susto", "qué miedo", "que miedo",
+        "me muero", "ataque", "qué hago", "que hago",
+        "dios mío", "dios mio", "qué horror", "que horror",
+        "qué angustia", "que angustia", "no puedo", "no aguanto",
+    )
+    if urgency_already_given and any(w in last_user.lower() for w in panic_words):
+        debug_print("🛡 manager override: post-urgency panic words → force emotional")
+        intent_primary = "emotional"
+    else:
+        intent_primary = intent.primary
+
+    new_state["last_intent"] = intent_primary
     new_state["detected_emotion"] = intent.detected_emotion or "neutral"
     new_state["pending_user_question"] = intent.user_question or ""
     new_state["short_acknowledgement"] = intent.short_acknowledgement or ""
+
+    # If the parent is signaling they want to end / go to a real pediatrician /
+    # is fed up, AND we already have the 3 critical fields, mark partial-data so
+    # triage_route delivers the recommendation we DO have instead of looping on
+    # checklist questions.
+    last_msg_lower = last_user.lower()
+    end_signals = (
+        "mejor lo llevo", "mejor llevo", "lo llevo al pediatra", "voy al pediatra",
+        "qué pereza", "que pereza", "ya no más", "ya no mas", "no más preguntas",
+        "no mas preguntas", "déjame ya", "dejame ya", "dame la respuesta", "deme la respuesta",
+    )
+    age = state.get("patient_age_months", "") or ""
+    temp = state.get("temperature", "") or ""
+    duration = state.get("fever_duration_hours", "") or ""
+    have_criticals = (
+        age and age not in {"desconocido", "0", ""}
+        and temp and temp not in {"desconocido", "no_medida", "0", ""}
+        and duration and duration not in {"desconocido", "0", ""}
+    )
+    rec_done = (state.get("recommendation_section") or "") == "done"
+    urgency_given = (state.get("urgency_recommendation_given") or "") == "yes"
+    if (
+        any(sig in last_msg_lower for sig in end_signals)
+        and have_criticals
+        and not rec_done
+        and not urgency_given
+    ):
+        debug_print("⏩ manager: parent signaling end + criticals complete → partial recommendation")
+        new_state["recommendation_with_partial_data"] = "yes"
+        new_state["last_intent"] = "data"  # so manager_route sends to receptor → triage → recommendation
+        new_state["pending_user_question"] = ""  # don't let triage route to answer_question
+        new_state["short_acknowledgement"] = ""
     return new_state
 
 

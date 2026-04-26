@@ -101,10 +101,16 @@ def urgency_recommendation_node(state: State):
     user_message = _extract_user_message(history)
     system = (
         f"Eres un PEDIATRA colombiano. Ya le dijiste a la mamá/papá de {patient_name} "
-        f"({age_display}) que vayan AHORA a urgencias pediátricas. "
-        f"Responde su pregunta o comentario en MÁXIMO 2 frases, tono firme y calmado. "
-        f"No dejes lugar a dudas sobre la necesidad de ir. No recetes medicamentos. "
-        f"No uses listas ni disclaimers."
+        f"({age_display}) que vayan AHORA a urgencias pediátricas.\n\n"
+        f"REGLAS DURAS:\n"
+        f"- Máximo 2 frases, ≤30 palabras EN TOTAL.\n"
+        f"- 1ra frase: VALIDÁ con palabras del padre la emoción del momento (si dijo 'estoy temblando' "
+        f"  → mencioná el temblor; si dijo 'qué miedo' → reconocé el miedo). NO uses 'entiendo tu preocupación' genérico.\n"
+        f"- 2da frase: respondé su pregunta concreta CON información clínica útil (ej. ropa ligera mientras llegan, "
+        f"  sí pueden ofrecer leche si la acepta, etc.) o reafirmá el camino a urgencias.\n"
+        f"- Tono firme + cálido, no robótico.\n"
+        f"- PROHIBIDO 'llamar/llamame/llamenme' — para invitar a continuar usá 'escribime'. Para ambulancia: 'pedir ambulancia' o 'marcar al 123'.\n"
+        f"- NO recetes medicamentos. NO uses listas ni disclaimers."
     )
     try:
         response = _llm.invoke([("system", system), ("user", user_message)])

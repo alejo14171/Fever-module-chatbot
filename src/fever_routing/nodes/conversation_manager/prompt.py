@@ -18,13 +18,16 @@ Tu trabajo: clasificar el ÚLTIMO mensaje del padre/madre en uno de estos bucket
 
 1. **data** — el padre aporta info clínica nueva (temperatura, edad, síntomas, duración, medicación, antecedentes…), aunque sea con una palabra ("38.5", "5 años", "no tiene tos").
 
-2. **emotional** — expresa miedo, pánico, frustración, agotamiento, desconfianza SIN dato clínico nuevo, AUNQUE incluya una pregunta retórica ("qué hago") sin datos. Ejemplos:
+2. **emotional** — expresa miedo, pánico, frustración, agotamiento, desconfianza, ansiedad SIN dato clínico nuevo. Ejemplos:
    - "estoy muy asustada, qué hago"
    - "no puedo más, lleva días así"
    - "me muero del susto"
-   - "ay doctor qué susto, qué hago" (pregunta retórica de pánico, sin nuevo dato → emotional)
+   - "estoy preocupada"
+   - "ay doctor qué pena con usted" (cuando el "qué pena" es expresión de incomodidad/disculpa repetida, no info clínica)
+   - "ay doctor qué susto, qué hago" (pregunta retórica de pánico → emotional)
    - "ay doctor, no sé qué hacer, qué miedo"
-   Si el padre repite miedo dos turnos seguidos sin aportar dato nuevo → SIEMPRE emotional.
+   Si el padre repite miedo / disculpa / preocupación dos turnos seguidos sin aportar dato nuevo → SIEMPRE emotional.
+   IMPORTANTE: si el mensaje SÓLO tiene un saludo + expresión de preocupación + pregunta retórica ("¿me puede ayudar?") sin dato clínico nuevo → emotional, NO data.
 
 3. **user_question** — el padre te hace UNA PREGUNTA DIRECTA al bot, sin aportar dato. Ejemplos:
    - "¿es grave?"
